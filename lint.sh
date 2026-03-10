@@ -2,6 +2,11 @@
 
 set -euo pipefail
 
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd -P)"
+readonly SCRIPT_DIR
+readonly SWIFTLINT_CONFIG_PATH="$SCRIPT_DIR/swiftlint.yml"
+readonly SWIFTFORMAT_CONFIG_PATH="$SCRIPT_DIR/airbnb.swiftformat"
+
 # Homebrew installs on Apple Silicon commonly live in /opt/homebrew/bin.
 if [[ "$(uname -m)" == "arm64" ]]; then
   export PATH="/opt/homebrew/bin:$PATH"
@@ -29,7 +34,7 @@ run_swiftlint() {
   done < <(git ls-files -z '*.swift')
 
   export SCRIPT_INPUT_FILE_COUNT="$i"
-  swiftlint lint --quiet --config swiftlint.yml --use-script-input-files "$@"
+  swiftlint lint --quiet --config "$SWIFTLINT_CONFIG_PATH" --use-script-input-files "$@"
 }
 
 run_swiftformat() {
@@ -38,7 +43,7 @@ run_swiftformat() {
     return 0
   fi
 
-  swiftformat . --quiet --config airbnb.swiftformat "$@"
+  swiftformat . --quiet --config "$SWIFTFORMAT_CONFIG_PATH"
 }
 
 if [[ "${1:-}" == "fix" ]]; then
